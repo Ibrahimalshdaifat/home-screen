@@ -1,27 +1,19 @@
 {
- "updated": "2026-10-27T05:36:36.449482Z",
+ "updated": "2026-10-27T09:27:46.857566Z",
  "sources": [
   {
    "source": "المملكة",
    "feed": "https://www.almamlakatv.com/rss.xml",
    "raw": 10,
-   "kept": 2,
-   "errors": [
-    "HTTPError:https://www.almamlakatv.com/feed",
-    "HTTPError:https://www.almamlakatv.com/feed/",
-    "HTTPError:https://www.almamlakatv.com/rss"
-   ]
+   "kept": 4,
+   "errors": []
   },
   {
    "source": "الغد",
    "feed": "https://alghad.com/rss",
    "raw": 15,
    "kept": 4,
-   "errors": [
-    "HTTPError:https://alghad.com/feed",
-    "HTTPError:https://alghad.com/feed",
-    "HTTPError:https://alghad.com/feed/"
-   ]
+   "errors": []
   },
   {
    "source": "بترا",
@@ -39,47 +31,34 @@
   },
   {
    "source": "عمون",
-   "feed": null,
-   "raw": 0,
-   "kept": 0,
+   "feed": "https://www.ammonnews.net/rss.php?type=news&id=3",
+   "raw": 50,
+   "kept": 4,
    "errors": [
-    "ParseError:https://www.ammonnews.net/feed",
-    "ParseError:https://www.ammonnews.net/feed/",
-    "ParseError:https://www.ammonnews.net/rss",
-    "ParseError:https://www.ammonnews.net/rss.xml",
-    "ParseError:https://www.ammonnews.net/rss/",
-    "ParseError:https://www.ammonnews.net/feeds/rss.xml"
+    "ParseError:https://www.ammonnews.net/rss.php",
+    "ParseError:https://www.ammonnews.net/rss.php?type=news&id=80"
    ]
   },
   {
    "source": "جو 24",
    "feed": "https://jo24.net/rss.xml",
    "raw": 50,
-   "kept": 5,
-   "errors": [
-    "HTTPError:https://jo24.net/feed/"
-   ]
+   "kept": 4,
+   "errors": []
   },
   {
    "source": "العربي الجديد",
    "feed": "https://www.alaraby.co.uk/rss",
-   "raw": 173,
-   "kept": 5,
+   "raw": 189,
+   "kept": 4,
    "errors": []
   },
   {
    "source": "التلفزيون العربي",
-   "feed": null,
-   "raw": 0,
-   "kept": 0,
-   "errors": [
-    "URLError:https://tv.alaraby.co.uk/feed",
-    "URLError:https://tv.alaraby.co.uk/feed/",
-    "URLError:https://tv.alaraby.co.uk/rss",
-    "URLError:https://tv.alaraby.co.uk/rss.xml",
-    "URLError:https://tv.alaraby.co.uk/rss/",
-    "URLError:https://tv.alaraby.co.uk/feeds/rss.xml"
-   ]
+   "feed": "https://www.alaraby.tv/feed",
+   "raw": 117,
+   "kept": 4,
+   "errors": []
   },
   {
    "source": "الجزيرة نت",
