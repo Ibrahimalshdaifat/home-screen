@@ -1,8 +1,15 @@
 name: news
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/5 * * * *"
+  push:
+    paths:
+      - fetch_news.py
+      - .github/workflows/news.yml
   workflow_dispatch:
+concurrency:
+  group: news
+  cancel-in-progress: false
 permissions:
   contents: write
 jobs:
