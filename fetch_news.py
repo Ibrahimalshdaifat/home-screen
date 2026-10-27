@@ -1,52 +1,106 @@
-import json, urllib.request, xml.etree.ElementTree as ET, datetime
+import json, re, datetime, urllib.request, urllib.parse, xml.etree.ElementTree as ET
 
-FEEDS = [
-    ("عمون", "https://www.ammonnews.net/rss.php?type=news&id=78"),
-    ("الغد", "https://alghad.com/feed"),
-    ("جو 24", "https://jo24.net/feed/"),
-    ("الجزيرة نت", "https://www.aljazeera.net/aljazeerarss/a7c186be-1baa-4bd4-9d80-a84db769f779/73d0e1b4-532f-45ef-b135-bfdff8b8cab9"),
-    ("بي بي سي عربي", "https://feeds.bbci.co.uk/arabic/rss.xml"),
+# ---------- المصادر: لكل مصدر روابط خلاصة معروفة وصفحات رئيسية يُكتشف منها الرابط تلقائيًا ----------
+SOURCES = [
+    {"name": "المملكة", "feeds": [], "homes": ["https://www.almamlakatv.com"]},
+    {"name": "الغد", "feeds": ["https://alghad.com/feed"], "homes": ["https://alghad.com"]},
+    {"name": "بترا", "feeds": [], "homes": ["https://petra.gov.jo"]},
+    {"name": "عمون", "feeds": [], "homes": ["https://www.ammonnews.net"]},
+    {"name": "جو 24", "feeds": ["https://jo24.net/feed/"], "homes": ["https://jo24.net"]},
+    {"name": "العربي الجديد", "feeds": [], "homes": ["https://www.alaraby.co.uk"]},
+    {"name": "التلفزيون العربي", "feeds": [], "homes": ["https://tv.alaraby.co.uk", "https://tv.alaraby.com"]},
+    {"name": "الجزيرة نت", "feeds": ["https://www.aljazeera.net/aljazeerarss/a7c186be-1baa-4bd4-9d80-a84db769f779/73d0e1b4-532f-45ef-b135-bfdff8b8cab9"], "homes": []},
+    {"name": "بي بي سي عربي", "feeds": ["https://feeds.bbci.co.uk/arabic/rss.xml"], "homes": []},
 ]
+GUESS = ["/feed", "/feed/", "/rss", "/rss.xml", "/rss/", "/feeds/rss.xml", "/rss.php", "/?feed=rss2"]
+PER_SOURCE = 5
+MAX_LEN = 100
 
-# ---- فلترة العناوين: تُعرض فقط الأخبار المهمة (سياسية واقتصادية واجتماعية) ----
-# عنوان فيه كلمة من قائمة الاستبعاد يُحذف. وبعدها لا يُقبل إلا عنوان فيه كلمة من قائمة القبول.
-# عدّل القائمتين كما تشاء: أضف كلمة لقبول أو استبعاد نوع من الأخبار.
+# ---------- فلترة العناوين: أخبار سياسية واقتصادية واجتماعية مهمة ومختصرة ----------
+# يُحذف العنوان إن فيه كلمة من EXCLUDE أو كان سؤالًا أو طويلًا، ثم لا يُقبل إلا إن فيه كلمة من INCLUDE.
 EXCLUDE = ["نشاط ممتع", "طفلك", "وصفة", "الأبراج", "حظك", "الرياضة", "رياضي", "كرة", "الدوري", "مباراة",
-           "فنان", "مسلسل", "فيلم", "أغنية", "موضة", "رجيم", "حمية", "طبخ", "آيفون", "ألعاب",
-           "عيد ميلاد", "زفاف", "مهرجان", "حصالة", "نصائح", "فوائد", "أسرار"]
-INCLUDE = ["الحكومة", "رئيس", "وزير", "وزارة", "مجلس", "النواب", "الأعيان", "الملك", "ولي العهد", "سياس",
-           "برلمان", "انتخاب", "قرار", "اتفاق", "مفاوضات", "هدنة", "حرب", "غارات", "قصف", "عدوان", "غزة",
+           "فنان", "مسلسل", "فيلم", "أغنية", "موضة", "رجيم", "حمية", "طبخ", "آيفون", "ألعاب", "حصالة",
+           "عيد ميلاد", "زفاف", "مهرجان", "نصائح", "فوائد", "أسرار", "أفضل", "طرق", "اكتشف", "تعرف على",
+           "دراسة", "كل ما تحتاج", "بالأرقام", "بالخرائط", "الذكاء الاصطناعي", "تقرير:", "شهادات", "كيف", "لماذا",
+           "ماذا", "هل ", "؟", "?", "إليك", "أبرز ", "قصة ", "حكاية", "في صور", "فيديو"]
+INCLUDE = ["الحكومة", "الوزراء", "الرئيس", "وزير", "وزارة", "مجلس", "النواب", "الأعيان", "الملك", "ولي العهد", "سياس",
+           "برلمان", "انتخاب", "اتفاق", "مفاوضات", "هدنة", "حرب", "غارات", "قصف", "عدوان", "غزة",
            "فلسطين", "الضفة", "القدس", "الأقصى", "إسرائيل", "الاحتلال", "سوريا", "لبنان", "العراق", "إيران",
-           "أمريكا", "واشنطن", "الأمم المتحدة", "مجلس الأمن", "عقوبات", "الجيش", "عاجل",
+           "واشنطن", "الأمم المتحدة", "مجلس الأمن", "عقوبات", "الجيش", "عاجل", "الأردن", "أردني",
            "اقتصاد", "أسعار", "سعر", "الدينار", "الدولار", "الذهب", "النفط", "موازنة", "ضريبة", "الضمان",
            "بنك", "البنك", "تضخم", "بطالة", "رواتب", "أجور", "استثمار", "الغاز", "الكهرباء", "المياه",
            "الدين", "ديون", "صادرات", "بورصة", "الأسواق",
-           "تعليم", "الجامعات", "التوجيهي", "المستشفى", "الصحة", "نقابة", "الفقر", "السكن", "قانون",
+           "تعليم", "الجامعات", "التوجيهي", "المستشفى", "نقابة", "الفقر", "السكن", "قانون",
            "القضاء", "محكمة", "فساد", "الأمن العام", "الدفاع المدني", "حريق", "فيضان"]
 
-def important(title):
-    if any(w in title for w in EXCLUDE):
+def important(t):
+    if len(t) > MAX_LEN or any(w in t for w in EXCLUDE):
         return False
-    return any(w in title for w in INCLUDE)
+    return any(w in t for w in INCLUDE)
 
+def get(url, limit=3000000):
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; HomeScreenBot)", "Accept": "*/*"})
+    return urllib.request.urlopen(req, timeout=15).read(limit)
 
-lists = []
-for name, url in FEEDS:
+def titles_of(data):
+    root = ET.fromstring(data)
+    out = []
+    for el in root.iter():
+        tag = el.tag.split("}")[-1]
+        if tag in ("item", "entry"):
+            for ch in el:
+                if ch.tag.split("}")[-1] == "title" and ch.text:
+                    t = re.sub(r"\s+", " ", ch.text).strip()
+                    if t:
+                        out.append(t)
+    return out
+
+def discover(home):
+    cands = []
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        root = ET.fromstring(urllib.request.urlopen(req, timeout=30).read())
-        titles = [(i.findtext("title") or "").strip() for i in root.iter("item")][:30]
-        lists.append([{"src": name, "title": t} for t in titles if t and important(t)][:6])
-        print("ok", name, len(lists[-1]))
-    except Exception as e:
-        print("fail", name, e)
+        html = get(home, 400000).decode("utf-8", "ignore")
+        for m in re.finditer(r"<link[^>]+type=[\"']application/(?:rss|atom)\+xml[\"'][^>]*>", html, re.I):
+            h = re.search(r"href=[\"']([^\"']+)", m.group(0))
+            if h:
+                cands.append(urllib.parse.urljoin(home, h.group(1)))
+    except Exception:
+        pass
+    cands += [home.rstrip("/") + g for g in GUESS]
+    seen, out = set(), []
+    for c in cands:
+        if c not in seen:
+            seen.add(c); out.append(c)
+    return out[:12]
+
+status, lists = [], []
+for s in SOURCES:
+    cands = list(s["feeds"])
+    for h in s["homes"]:
+        cands += discover(h)
+    used, raw, err = None, [], []
+    for url in cands[:16]:
+        try:
+            ts = titles_of(get(url))
+            if len(ts) >= 3:
+                used, raw = url, ts
+                break
+            err.append("few:" + url)
+        except Exception as e:
+            err.append(type(e).__name__ + ":" + url)
+    kept = [t for t in raw if important(t)][:PER_SOURCE]
+    lists.append([{"src": s["name"], "title": t} for t in kept])
+    status.append({"source": s["name"], "feed": used, "raw": len(raw), "kept": len(kept), "errors": err[:6]})
+    print("ok" if used else "fail", s["name"], len(raw), len(kept))
 
 merged = []
-for i in range(6):
+for i in range(PER_SOURCE):
     for lst in lists:
         if i < len(lst):
             merged.append(lst[i])
 
+now = datetime.datetime.utcnow().isoformat() + "Z"
+with open("status.json", "w", encoding="utf-8") as f:
+    json.dump({"updated": now, "sources": status}, f, ensure_ascii=False, indent=1)
 if merged:
     with open("news.json", "w", encoding="utf-8") as f:
-        json.dump({"updated": datetime.datetime.utcnow().isoformat() + "Z", "items": merged}, f, ensure_ascii=False)
+        json.dump({"updated": now, "items": merged}, f, ensure_ascii=False)
