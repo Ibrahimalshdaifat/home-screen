@@ -1,12 +1,14 @@
 {
- "updated": "2026-10-27T19:20:15.421971Z",
+ "updated": "2026-10-27T19:30:33.199086Z",
  "sources": [
   {
    "source": "المملكة",
-   "feed": "https://www.almamlakatv.com/rss.xml",
-   "raw": 10,
-   "kept": 1,
-   "errors": []
+   "feed": null,
+   "raw": 0,
+   "kept": 0,
+   "errors": [
+    "TimeoutError:https://www.almamlakatv.com/rss.xml"
+   ]
   },
   {
    "source": "الغد",
@@ -18,7 +20,7 @@
   {
    "source": "التلفزيون العربي",
    "feed": "https://www.alaraby.tv/feed",
-   "raw": 126,
+   "raw": 127,
    "kept": 3,
    "errors": []
   },
