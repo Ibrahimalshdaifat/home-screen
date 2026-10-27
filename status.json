@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-27T19:30:33.199086Z",
+ "updated": "2026-10-27T19:40:13.455504Z",
  "sources": [
   {
    "source": "المملكة",
@@ -7,7 +7,7 @@
    "raw": 0,
    "kept": 0,
    "errors": [
-    "TimeoutError:https://www.almamlakatv.com/rss.xml"
+    "HTTPError:https://www.almamlakatv.com/rss.xml"
    ]
   },
   {
