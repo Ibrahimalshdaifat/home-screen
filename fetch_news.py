@@ -4,16 +4,12 @@ import json, re, datetime, urllib.request, urllib.parse, xml.etree.ElementTree a
 SOURCES = [
     {"name": "المملكة", "feeds": ["https://www.almamlakatv.com/rss.xml"], "homes": [], "local": True},
     {"name": "الغد", "feeds": ["https://alghad.com/rss"], "homes": [], "local": True},
-    {"name": "بترا", "feeds": [], "homes": ["https://petra.gov.jo"], "local": True},
-    {"name": "عمون", "feeds": [], "homes": ["https://www.ammonnews.net"], "local": True},
-    {"name": "جو 24", "feeds": ["https://jo24.net/rss.xml"], "homes": [], "local": True},
-    {"name": "العربي الجديد", "feeds": ["https://www.alaraby.co.uk/rss"], "homes": []},
-    {"name": "التلفزيون العربي", "feeds": [], "homes": ["https://www.alaraby.tv", "https://alaraby.tv", "https://tv.alaraby.com"]},
+    {"name": "التلفزيون العربي", "feeds": ["https://www.alaraby.tv/feed"], "homes": []},
     {"name": "الجزيرة نت", "feeds": ["https://www.aljazeera.net/aljazeerarss/a7c186be-1baa-4bd4-9d80-a84db769f779/73d0e1b4-532f-45ef-b135-bfdff8b8cab9"], "homes": []},
     {"name": "بي بي سي عربي", "feeds": ["https://feeds.bbci.co.uk/arabic/rss.xml"], "homes": []},
 ]
 GUESS = ["/feed", "/feed/", "/rss", "/rss.xml", "/rss/", "/feeds/rss.xml", "/rss.php", "/?feed=rss2"]
-PER_SOURCE = 4
+PER_SOURCE = 3
 MAX_LEN = 100
 
 # ---------- فلترة العناوين: أخبار سياسية واقتصادية واجتماعية مهمة ومختصرة ----------
@@ -34,7 +30,7 @@ INCLUDE = ["الحكومة", "الوزراء", "الرئيس", "وزير", "وز
            "القضاء", "محكمة", "فساد", "الأمن العام", "الدفاع المدني", "حريق", "فيضان"]
 
 # ---- استبعاد عام: الصحة والحياة والنصائح ----
-EXCLUDE += ["الصحة", "صحي", "صحية", "مرض", "أمراض", "علاج", "طبيب", "سرطان", "مستشفى", "المستشفى", "غذاء", "تغذية",
+EXCLUDE += ["العزاء", "التعزية", "تعزية", "نعي", "تنعى", "التهنئة", "تهنئة", "يهنئ", "تهنئ", "مسارين", "مساري", "مسارات جديدة", "النقل البري", "تطلق مسار", "الصحة", "صحي", "صحية", "مرض", "أمراض", "علاج", "طبيب", "سرطان", "مستشفى", "المستشفى", "غذاء", "تغذية",
             "دواء", "لقاح", "فيروس", "الحياة", "نمط", "أسلوب", "نصيحة", "تحذير من تناول", "الطقس", "حالة الطقس"]
 INCLUDE = [w for w in INCLUDE if w not in ("المستشفى",)]
 
