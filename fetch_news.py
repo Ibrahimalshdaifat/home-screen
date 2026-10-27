@@ -2,18 +2,18 @@ import json, re, datetime, urllib.request, urllib.parse, xml.etree.ElementTree a
 
 # ---------- المصادر: لكل مصدر روابط خلاصة معروفة وصفحات رئيسية يُكتشف منها الرابط تلقائيًا ----------
 SOURCES = [
-    {"name": "المملكة", "feeds": [], "homes": ["https://www.almamlakatv.com"]},
-    {"name": "الغد", "feeds": ["https://alghad.com/feed"], "homes": ["https://alghad.com"]},
-    {"name": "بترا", "feeds": [], "homes": ["https://petra.gov.jo"]},
-    {"name": "عمون", "feeds": [], "homes": ["https://www.ammonnews.net"]},
-    {"name": "جو 24", "feeds": ["https://jo24.net/feed/"], "homes": ["https://jo24.net"]},
-    {"name": "العربي الجديد", "feeds": [], "homes": ["https://www.alaraby.co.uk"]},
-    {"name": "التلفزيون العربي", "feeds": [], "homes": ["https://tv.alaraby.co.uk", "https://tv.alaraby.com"]},
+    {"name": "المملكة", "feeds": ["https://www.almamlakatv.com/rss.xml"], "homes": [], "local": True},
+    {"name": "الغد", "feeds": ["https://alghad.com/rss"], "homes": [], "local": True},
+    {"name": "بترا", "feeds": [], "homes": ["https://petra.gov.jo"], "local": True},
+    {"name": "عمون", "feeds": [], "homes": ["https://www.ammonnews.net"], "local": True},
+    {"name": "جو 24", "feeds": ["https://jo24.net/rss.xml"], "homes": [], "local": True},
+    {"name": "العربي الجديد", "feeds": ["https://www.alaraby.co.uk/rss"], "homes": []},
+    {"name": "التلفزيون العربي", "feeds": [], "homes": ["https://www.alaraby.tv", "https://alaraby.tv", "https://tv.alaraby.com"]},
     {"name": "الجزيرة نت", "feeds": ["https://www.aljazeera.net/aljazeerarss/a7c186be-1baa-4bd4-9d80-a84db769f779/73d0e1b4-532f-45ef-b135-bfdff8b8cab9"], "homes": []},
     {"name": "بي بي سي عربي", "feeds": ["https://feeds.bbci.co.uk/arabic/rss.xml"], "homes": []},
 ]
 GUESS = ["/feed", "/feed/", "/rss", "/rss.xml", "/rss/", "/feeds/rss.xml", "/rss.php", "/?feed=rss2"]
-PER_SOURCE = 5
+PER_SOURCE = 4
 MAX_LEN = 100
 
 # ---------- فلترة العناوين: أخبار سياسية واقتصادية واجتماعية مهمة ومختصرة ----------
@@ -33,10 +33,32 @@ INCLUDE = ["الحكومة", "الوزراء", "الرئيس", "وزير", "وز
            "تعليم", "الجامعات", "التوجيهي", "المستشفى", "نقابة", "الفقر", "السكن", "قانون",
            "القضاء", "محكمة", "فساد", "الأمن العام", "الدفاع المدني", "حريق", "فيضان"]
 
-def important(t):
+# ---- استبعاد عام: الصحة والحياة والنصائح ----
+EXCLUDE += ["الصحة", "صحي", "صحية", "مرض", "أمراض", "علاج", "طبيب", "سرطان", "مستشفى", "المستشفى", "غذاء", "تغذية",
+            "دواء", "لقاح", "فيروس", "الحياة", "نمط", "أسلوب", "نصيحة", "تحذير من تناول", "الطقس", "حالة الطقس"]
+INCLUDE = [w for w in INCLUDE if w not in ("المستشفى",)]
+
+# ---- المصادر المحلية: أخبار أردنية مهمة فقط ----
+LOCAL = ["الأردن", "الأردني", "الأردنية", "عمّان", "عمان", "الحكومة", "النواب", "الأعيان", "الملك", "ولي العهد",
+         "وزارة", "وزير", "الوزراء", "مجلس", "الضمان", "الدينار", "أسعار", "المحروقات", "البنزين", "الكهرباء",
+         "المياه", "الأمن العام", "الدفاع المدني", "التوجيهي", "الجامعات", "التعليم", "الموازنة", "الضريبة",
+         "البطالة", "الرواتب", "السيول", "فيضان", "حريق", "القضاء", "محكمة", "فساد", "نقابة", "قانون", "البنك المركزي",
+         "العقبة", "إربد", "الزرقاء", "الكرك", "معان", "السلط", "مأدبا", "المفرق", "جرش", "عجلون", "الطفيلة"]
+WORLD = ["إسرائيل", "إسرائيلية", "نتنياهو", "ترامب", "ترمب", "إيران", "البرازيل", "لولا", "أميركا", "أمريكا", "واشنطن",
+         "اليمن", "سوريا", "السورية", "لبنان", "العراق", "غزة", "فلسطين", "الضفة", "الاحتلال", "روسيا", "أوكرانيا", "الصين"]
+
+def important(t, local=False):
     if len(t) > MAX_LEN or any(w in t for w in EXCLUDE):
         return False
+    if local:
+        jo = any(w in t for w in ("الأردن", "الأردني", "الأردنية", "عمّان"))
+        if any(w in t for w in WORLD) and not jo:
+            return False
+        return any(w in t for w in LOCAL)
     return any(w in t for w in INCLUDE)
+
+def norm(t):
+    return re.sub(r"[^\u0600-\u06FF0-9a-zA-Z]", "", t)[:35]
 
 def get(url, limit=3000000):
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; HomeScreenBot)", "Accept": "*/*"})
@@ -63,6 +85,8 @@ def discover(home):
             h = re.search(r"href=[\"']([^\"']+)", m.group(0))
             if h:
                 cands.append(urllib.parse.urljoin(home, h.group(1)))
+        for m in re.finditer(r"href=[\"']([^\"']*(?:rss|feed)[^\"']*)", html, re.I):
+            cands.append(urllib.parse.urljoin(home, m.group(1)))
     except Exception:
         pass
     cands += [home.rstrip("/") + g for g in GUESS]
@@ -87,16 +111,19 @@ for s in SOURCES:
             err.append("few:" + url)
         except Exception as e:
             err.append(type(e).__name__ + ":" + url)
-    kept = [t for t in raw if important(t)][:PER_SOURCE]
+    kept = [t for t in raw if important(t, s.get("local"))][:PER_SOURCE]
     lists.append([{"src": s["name"], "title": t} for t in kept])
     status.append({"source": s["name"], "feed": used, "raw": len(raw), "kept": len(kept), "errors": err[:6]})
     print("ok" if used else "fail", s["name"], len(raw), len(kept))
 
-merged = []
+merged, seen_t = [], set()
 for i in range(PER_SOURCE):
     for lst in lists:
         if i < len(lst):
-            merged.append(lst[i])
+            k = norm(lst[i]["title"])
+            if k not in seen_t:
+                seen_t.add(k)
+                merged.append(lst[i])
 
 now = datetime.datetime.utcnow().isoformat() + "Z"
 with open("status.json", "w", encoding="utf-8") as f:
