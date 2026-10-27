@@ -1,0 +1,99 @@
+{
+ "updated": "2026-10-27T05:34:48.913200Z",
+ "sources": [
+  {
+   "source": "المملكة",
+   "feed": "https://www.almamlakatv.com/rss.xml",
+   "raw": 10,
+   "kept": 3,
+   "errors": [
+    "HTTPError:https://www.almamlakatv.com/feed",
+    "HTTPError:https://www.almamlakatv.com/feed/",
+    "HTTPError:https://www.almamlakatv.com/rss"
+   ]
+  },
+  {
+   "source": "الغد",
+   "feed": "https://alghad.com/rss",
+   "raw": 15,
+   "kept": 4,
+   "errors": [
+    "HTTPError:https://alghad.com/feed",
+    "HTTPError:https://alghad.com/feed",
+    "HTTPError:https://alghad.com/feed/"
+   ]
+  },
+  {
+   "source": "بترا",
+   "feed": null,
+   "raw": 0,
+   "kept": 0,
+   "errors": [
+    "ParseError:https://petra.gov.jo/feed",
+    "ParseError:https://petra.gov.jo/feed/",
+    "ParseError:https://petra.gov.jo/rss",
+    "ParseError:https://petra.gov.jo/rss.xml",
+    "ParseError:https://petra.gov.jo/rss/",
+    "ParseError:https://petra.gov.jo/feeds/rss.xml"
+   ]
+  },
+  {
+   "source": "عمون",
+   "feed": null,
+   "raw": 0,
+   "kept": 0,
+   "errors": [
+    "ParseError:https://www.ammonnews.net/feed",
+    "ParseError:https://www.ammonnews.net/feed/",
+    "ParseError:https://www.ammonnews.net/rss",
+    "ParseError:https://www.ammonnews.net/rss.xml",
+    "HTTPError:https://www.ammonnews.net/rss/",
+    "HTTPError:https://www.ammonnews.net/feeds/rss.xml"
+   ]
+  },
+  {
+   "source": "جو 24",
+   "feed": "https://jo24.net/rss.xml",
+   "raw": 50,
+   "kept": 5,
+   "errors": [
+    "HTTPError:https://jo24.net/feed/"
+   ]
+  },
+  {
+   "source": "العربي الجديد",
+   "feed": "https://www.alaraby.co.uk/rss",
+   "raw": 173,
+   "kept": 5,
+   "errors": []
+  },
+  {
+   "source": "التلفزيون العربي",
+   "feed": null,
+   "raw": 0,
+   "kept": 0,
+   "errors": [
+    "URLError:https://tv.alaraby.co.uk/feed",
+    "URLError:https://tv.alaraby.co.uk/feed/",
+    "URLError:https://tv.alaraby.co.uk/rss",
+    "URLError:https://tv.alaraby.co.uk/rss.xml",
+    "URLError:https://tv.alaraby.co.uk/rss/",
+    "URLError:https://tv.alaraby.co.uk/feeds/rss.xml"
+   ]
+  },
+  {
+   "source": "الجزيرة نت",
+   "feed": "https://www.aljazeera.net/aljazeerarss/a7c186be-1baa-4bd4-9d80-a84db769f779/73d0e1b4-532f-45ef-b135-bfdff8b8cab9",
+   "raw": 25,
+   "kept": 4,
+   "errors": []
+  },
+  {
+   "source": "بي بي سي عربي",
+   "feed": "https://feeds.bbci.co.uk/arabic/rss.xml",
+   "raw": 26,
+   "kept": 4,
+   "errors": []
+  }
+ ]
+}
