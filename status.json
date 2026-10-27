@@ -1,11 +1,11 @@
 {
- "updated": "2026-10-27T05:34:48.913200Z",
+ "updated": "2026-10-27T05:36:36.449482Z",
  "sources": [
   {
    "source": "المملكة",
    "feed": "https://www.almamlakatv.com/rss.xml",
    "raw": 10,
-   "kept": 3,
+   "kept": 2,
    "errors": [
     "HTTPError:https://www.almamlakatv.com/feed",
     "HTTPError:https://www.almamlakatv.com/feed/",
@@ -47,8 +47,8 @@
     "ParseError:https://www.ammonnews.net/feed/",
     "ParseError:https://www.ammonnews.net/rss",
     "ParseError:https://www.ammonnews.net/rss.xml",
-    "HTTPError:https://www.ammonnews.net/rss/",
-    "HTTPError:https://www.ammonnews.net/feeds/rss.xml"
+    "ParseError:https://www.ammonnews.net/rss/",
+    "ParseError:https://www.ammonnews.net/feeds/rss.xml"
    ]
   },
   {
