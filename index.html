@@ -350,7 +350,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
     if (!k) { b.style.display = 'none'; b.setAttribute('data-k', ''); return; }
     if (b.getAttribute('data-k') !== k) {
       b.setAttribute('data-k', k);
-      b.innerHTML = (k === 'morning' ? 'أذكار الصباح' : 'أذكار المساء') + '<small>اضغط OK للبدء</small>';
+      b.innerHTML = (k === 'morning' ? 'أذكار الصباح' : 'أذكار المساء') + '<small>اضغط OK في أي مكان</small>';
     }
     if (b.style.display !== 'block') { b.style.display = 'block'; try { b.focus(); } catch (e) {} }
   }
@@ -362,7 +362,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
       tx.textContent = it.t;
       tx.style.fontSize = Math.min(5.2, Math.sqrt(5500 / len)).toFixed(2) + 'rem';
       $('afNote').textContent = it.n || '';
-      $('afCount').textContent = (AF.i + 1) + ' / ' + window.ADHKAR.length + '   ·   رجوع للإغلاق';
+      $('afCount').textContent = (AF.i + 1) + ' / ' + window.ADHKAR.length + '   ·   OK للتالي   ·   رجوع للإغلاق';
       tx.style.opacity = 1;
     }
     if (first) { put(); } else { tx.style.opacity = 0; AF.pt = setTimeout(put, 700); }
@@ -393,18 +393,23 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
     var now = new Date().getTime(); if (now - AF.last < 400) { return; } AF.last = now;
     if (AF.open) { afClose(); } else { afOpen(); }
   }
-  $('adhkarBtn').onclick = afToggle;
-  $('afNext').onclick = afNext;
-  $('afPrev').onclick = afPrev;
+  /* الريموت في وضع المؤشر: OK = نقرة في أي مكان. لذلك أي نقرة أو OK تفتح الأذكار في وقتها، وأثناء العرض تنتقل للتالي */
+  function afPress() {
+    var now = new Date().getTime(); if (now - AF.last < 500) { return; } AF.last = now;
+    if (AF.open) { afNext(); } else if ($('adhkarBtn').style.display === 'block') { afOpen(); }
+  }
+  document.onclick = afPress;
+  $('afPrev').onclick = function (e) { e = e || window.event; if (e.stopPropagation) { e.stopPropagation(); } AF.last = new Date().getTime(); afPrev(); };
   window.onpopstate = function () { if (AF.open) { afClose(true); } };
   document.onkeydown = function (e) {
     e = e || window.event; var k = e.keyCode;
     var stop = false;
     if (AF.open) {
-      if (k === 13 || k === 39) { afNext(); stop = true; }
+      if (k === 13) { afPress(); stop = true; }
+      else if (k === 39) { afNext(); stop = true; }
       else if (k === 37) { afPrev(); stop = true; }
       else if (k === 27 || k === 8 || k === 10009 || k === 461) { afClose(); stop = true; }
-    } else if (k === 13 && $('adhkarBtn').style.display === 'block') { afToggle(); stop = true; }
+    } else if (k === 13 && $('adhkarBtn').style.display === 'block') { afPress(); stop = true; }
     if (stop && e.preventDefault) { e.preventDefault(); }
   };
 
