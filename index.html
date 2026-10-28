@@ -64,7 +64,9 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
 #afHint{font-size:2.4rem;color:#86d0be;margin-bottom:1rem;line-height:1.4}
 #afText{font-family:'Amiri','Traditional Arabic','Times New Roman',serif;line-height:1.65;-webkit-transition:opacity .7s ease;transition:opacity .7s ease}
 #afNote{font-size:2.1rem;color:#e0bc72;min-height:1.4em;margin-top:1rem}
-#afCount{font-size:1.5rem;color:#93a4a7;line-height:1.4}
+#afBar{width:100%;display:flex;direction:ltr;justify-content:space-between;align-items:center}
+#afCount{font-size:1.6rem;color:#93a4a7;line-height:1.4;direction:rtl}
+#afPrev,#afNext{font-size:2rem;color:#86d0be;padding:.3rem 1.6rem .5rem;border:1px solid rgba(134,208,190,.5);border-radius:2rem;cursor:pointer}
 .dhikr.long #dhikrText{font-size:1.7rem;line-height:1.55}
 </style>
 </head>
@@ -99,7 +101,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
 <div id="adhkarFull"><div id="afBox">
   <div id="afTitle"></div>
   <div id="afMid"><div id="afHint"></div><div id="afText"></div><div id="afNote"></div></div>
-  <div id="afCount"></div>
+  <div id="afBar"><span id="afPrev">← السابق</span><span id="afCount"></span><span id="afNext">التالي →</span></div>
 </div></div>
 
 <script src="adhkar.js"></script>
@@ -334,7 +336,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
   }
 
   /* ---------- أذكار الصباح والمساء: زر يظهر في وقته، والضغط عليه (OK) يبدأ العرض بملء الشاشة ---------- */
-  var AF = { open: false, i: 0, timer: null, kind: '', last: 0, pushed: false };
+  var AF = { open: false, i: 0, timer: null, pt: null, kind: '', last: 0, pushed: false };
   function adhkarKind() {
     if (!prayerState || !window.ADHKAR) { return ''; }
     var n = ammanNow(), m = n.getUTCHours() * 60 + n.getUTCMinutes(), t = prayerState.t;
@@ -353,22 +355,24 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
     if (b.style.display !== 'block') { b.style.display = 'block'; try { b.focus(); } catch (e) {} }
   }
   function afShow(first) {
+    clearTimeout(AF.timer); clearTimeout(AF.pt);
     var it = window.ADHKAR[AF.i], tx = $('afText'), len = it.t.length + (it.h ? it.h.length : 0);
     function put() {
       $('afHint').textContent = it.h || '';
       tx.textContent = it.t;
       tx.style.fontSize = (len > 500 ? 2.5 : len > 350 ? 3 : len > 220 ? 3.6 : len > 120 ? 4.4 : 5.2) + 'rem';
       $('afNote').textContent = it.n || '';
-      $('afCount').textContent = (AF.i + 1) + ' / ' + window.ADHKAR.length + '   ·   اضغط OK أو رجوع للإغلاق';
+      $('afCount').textContent = (AF.i + 1) + ' / ' + window.ADHKAR.length + '   ·   رجوع للإغلاق';
       tx.style.opacity = 1;
     }
-    if (first) { put(); } else { tx.style.opacity = 0; setTimeout(put, 700); }
+    if (first) { put(); } else { tx.style.opacity = 0; AF.pt = setTimeout(put, 700); }
     AF.timer = setTimeout(afNext, Math.max(25, Math.ceil(len / 8)) * 1000);
   }
   function afNext() {
     AF.i++;
     if (AF.i >= window.ADHKAR.length) { afClose(); } else { afShow(false); }
   }
+  function afPrev() { if (AF.i > 0) { AF.i--; afShow(false); } }
   function afOpen() {
     AF.kind = $('adhkarBtn').getAttribute('data-k'); if (!AF.kind) { return; }
     AF.open = true; AF.i = 0;
@@ -378,7 +382,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
     afShow(true);
   }
   function afClose(fromPop) {
-    AF.open = false; clearTimeout(AF.timer);
+    AF.open = false; clearTimeout(AF.timer); clearTimeout(AF.pt);
     if (AF.pushed && !fromPop) { AF.pushed = false; try { history.back(); } catch (e) {} }
     AF.pushed = false;
     $('adhkarFull').style.display = 'none';
@@ -390,11 +394,18 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
     if (AF.open) { afClose(); } else { afOpen(); }
   }
   $('adhkarBtn').onclick = afToggle;
+  $('afNext').onclick = afNext;
+  $('afPrev').onclick = afPrev;
   window.onpopstate = function () { if (AF.open) { afClose(true); } };
   document.onkeydown = function (e) {
     e = e || window.event; var k = e.keyCode;
-    if (k === 13 && (AF.open || $('adhkarBtn').style.display === 'block')) { afToggle(); if (e.preventDefault) { e.preventDefault(); } }
-    else if (AF.open && (k === 27 || k === 8 || k === 10009 || k === 461)) { afToggle(); if (e.preventDefault) { e.preventDefault(); } }
+    var stop = false;
+    if (AF.open) {
+      if (k === 13 || k === 39) { afNext(); stop = true; }
+      else if (k === 37) { afPrev(); stop = true; }
+      else if (k === 27 || k === 8 || k === 10009 || k === 461) { afClose(); stop = true; }
+    } else if (k === 13 && $('adhkarBtn').style.display === 'block') { afToggle(); stop = true; }
+    if (stop && e.preventDefault) { e.preventDefault(); }
   };
 
   /* ---------- الأخبار: عدة طرق بالتتابع حتى تنجح واحدة ---------- */
