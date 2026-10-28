@@ -62,7 +62,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
 #afTitle{font-size:2.6rem;color:#e0bc72;font-weight:600;line-height:1.3}
 #afMid{flex:1 1 0;min-height:0;display:flex;flex-direction:column;justify-content:center;width:100%}
 #afHint{font-size:2.4rem;color:#86d0be;margin-bottom:1rem;line-height:1.4}
-#afText{font-family:'Amiri','Traditional Arabic','Times New Roman',serif;line-height:1.75;-webkit-transition:opacity .7s ease;transition:opacity .7s ease}
+#afText{font-family:'Amiri','Traditional Arabic','Times New Roman',serif;line-height:1.65;-webkit-transition:opacity .7s ease;transition:opacity .7s ease}
 #afNote{font-size:2.1rem;color:#e0bc72;min-height:1.4em;margin-top:1rem}
 #afCount{font-size:1.5rem;color:#93a4a7;line-height:1.4}
 .dhikr.long #dhikrText{font-size:1.7rem;line-height:1.55}
@@ -334,7 +334,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
   }
 
   /* ---------- أذكار الصباح والمساء: زر يظهر في وقته، والضغط عليه (OK) يبدأ العرض بملء الشاشة ---------- */
-  var AF = { open: false, i: 0, timer: null, kind: '', last: 0 };
+  var AF = { open: false, i: 0, timer: null, kind: '', last: 0, pushed: false };
   function adhkarKind() {
     if (!prayerState || !window.ADHKAR) { return ''; }
     var n = ammanNow(), m = n.getUTCHours() * 60 + n.getUTCMinutes(), t = prayerState.t;
@@ -357,13 +357,13 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
     function put() {
       $('afHint').textContent = it.h || '';
       tx.textContent = it.t;
-      tx.style.fontSize = (len > 300 ? 3.4 : len > 200 ? 4 : len > 110 ? 4.8 : 5.6) + 'rem';
+      tx.style.fontSize = (len > 500 ? 2.5 : len > 350 ? 3 : len > 220 ? 3.6 : len > 120 ? 4.4 : 5.2) + 'rem';
       $('afNote').textContent = it.n || '';
       $('afCount').textContent = (AF.i + 1) + ' / ' + window.ADHKAR.length + '   ·   اضغط OK أو رجوع للإغلاق';
       tx.style.opacity = 1;
     }
     if (first) { put(); } else { tx.style.opacity = 0; setTimeout(put, 700); }
-    AF.timer = setTimeout(afNext, Math.max(20, Math.ceil(len / 10)) * 1000);
+    AF.timer = setTimeout(afNext, Math.max(25, Math.ceil(len / 8)) * 1000);
   }
   function afNext() {
     AF.i++;
@@ -374,10 +374,13 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
     AF.open = true; AF.i = 0;
     $('afTitle').textContent = AF.kind === 'morning' ? 'أذكار الصباح' : 'أذكار المساء';
     $('adhkarFull').style.display = 'block';
+    try { history.pushState({ af: 1 }, ''); AF.pushed = true; } catch (e) {}
     afShow(true);
   }
-  function afClose() {
+  function afClose(fromPop) {
     AF.open = false; clearTimeout(AF.timer);
+    if (AF.pushed && !fromPop) { AF.pushed = false; try { history.back(); } catch (e) {} }
+    AF.pushed = false;
     $('adhkarFull').style.display = 'none';
     $('adhkarBtn').style.display = 'none';
     updateAdhkarBtn();
@@ -387,6 +390,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
     if (AF.open) { afClose(); } else { afOpen(); }
   }
   $('adhkarBtn').onclick = afToggle;
+  window.onpopstate = function () { if (AF.open) { afClose(true); } };
   document.onkeydown = function (e) {
     e = e || window.event; var k = e.keyCode;
     if (k === 13 && (AF.open || $('adhkarBtn').style.display === 'block')) { afToggle(); if (e.preventDefault) { e.preventDefault(); } }
