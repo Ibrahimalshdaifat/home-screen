@@ -1,11 +1,11 @@
 {
- "updated": "2026-10-28T17:30:20.386220Z",
+ "updated": "2026-10-28T17:40:14.143737Z",
  "sources": [
   {
    "source": "المملكة",
    "feed": "https://www.almamlakatv.com/rss.xml",
    "raw": 10,
-   "kept": 3,
+   "kept": 2,
    "errors": []
   },
   {
@@ -33,7 +33,7 @@
    "source": "بي بي سي عربي",
    "feed": "https://feeds.bbci.co.uk/arabic/rss.xml",
    "raw": 27,
-   "kept": 2,
+   "kept": 1,
    "errors": []
   }
  ]
