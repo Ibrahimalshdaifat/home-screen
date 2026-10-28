@@ -370,7 +370,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
       tx.style.opacity = 1;
     }
     if (first) { put(); } else { tx.style.opacity = 0; AF.pt = setTimeout(put, 700); }
-    var secs = 15 + Math.ceil(len / 8);
+    var secs = Math.max(10, Math.ceil(len * 14 / 315));
     AF.timer = setTimeout(afNext, secs * 1000);
     var bar = $('afBar2'); bar.style.webkitTransition = 'none'; bar.style.transition = 'none'; bar.style.width = '100%';
     setTimeout(function () { bar.style.webkitTransition = 'width ' + secs + 's linear'; bar.style.transition = 'width ' + secs + 's linear'; bar.style.width = '0%'; }, 60);
