@@ -360,7 +360,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
     function put() {
       $('afHint').textContent = it.h || '';
       tx.textContent = it.t;
-      tx.style.fontSize = (len > 500 ? 2.5 : len > 350 ? 3 : len > 220 ? 3.6 : len > 120 ? 4.4 : 5.2) + 'rem';
+      tx.style.fontSize = Math.min(5.2, Math.sqrt(5500 / len)).toFixed(2) + 'rem';
       $('afNote').textContent = it.n || '';
       $('afCount').textContent = (AF.i + 1) + ' / ' + window.ADHKAR.length + '   ·   رجوع للإغلاق';
       tx.style.opacity = 1;
