@@ -142,13 +142,22 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
       { name: 'الجزيرة نت', url: 'https://www.aljazeera.net/aljazeerarss/a7c186be-1baa-4bd4-9d80-a84db769f779/73d0e1b4-532f-45ef-b135-bfdff8b8cab9' },
       { name: 'بي بي سي عربي', url: 'https://feeds.bbci.co.uk/arabic/rss.xml' }
     ],
-    // أذكار مؤقتة حتى تحدد الأذكار التي تريدها
+    // الأذكار القصيرة للشريط السفلي (بلا حركات، وتُعرض بترتيب عشوائي)
     adhkar: [
-      'سبحان الله وبحمده، سبحان الله العظيم',
-      'لا حول ولا قوة إلا بالله',
-      'أستغفر الله وأتوب إليه',
-      'اللهم صلِّ وسلِّم على نبينا محمد',
-      'لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير'
+      "سبحان الله وبحمده سبحان الله العظيم",
+      "لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير",
+      "لا حول ولا قوة إلا بالله",
+      "اللهم صل على سيدنا محمد وآله وسلم",
+      "أستغفر الله العظيم",
+      "سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر",
+      "يا مقلب القلوب ثبت قلبي على دينك",
+      "ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار",
+      "حسبي الله لا إله إلا هو عليه توكلت وهو رب العرش العظيم",
+      "رب اجعلني مقيم الصلاة ومن ذريتي ربنا وتقبل دعاء",
+      "ربنا اغفر لي ولوالدي وللمؤمنين يوم يقوم الحساب",
+      "ربنا آمنا فاغفر لنا وارحمنا وأنت خير الراحمين",
+      "ربنا هب لنا من أزواجنا وذرياتنا قرة أعين واجعلنا للمتقين إماما",
+      "ربنا اغفر لنا ولإخواننا الذين سبقونا بالإيمان ولا تجعل في قلوبنا غلا للذين آمنوا ربنا إنك رءوف رحيم"
     ]
   };
   /* ================================================= */
@@ -330,15 +339,24 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
   }
 
   /* ---------- الأذكار ---------- */
-  var dIndex = -1;
+  var dBag = [], dList = null, dLast = -1;
   function nextDhikr(first) {
     var el = $('dhikrText');
     var fri = ammanNow().getUTCDay() === 5 && window.ADHKAR_FRIDAY;
     var list = fri ? window.ADHKAR_FRIDAY : CONFIG.adhkar;
     if (!list.length) { return; }
+    function pick() {
+      if (dList !== list) { dList = list; dBag = []; dLast = -1; }
+      if (!dBag.length) {
+        for (var i = 0; i < list.length; i++) { dBag.push(i); }
+        for (var j = dBag.length - 1; j > 0; j--) { var r = Math.floor(Math.random() * (j + 1)), t = dBag[j]; dBag[j] = dBag[r]; dBag[r] = t; }
+        if (dBag.length > 1 && dBag[dBag.length - 1] === dLast) { var u = dBag.shift(); dBag.push(u); }
+      }
+      dLast = dBag.pop(); return dLast;
+    }
     function swap() {
-      dIndex = (dIndex + 1) % list.length; el.textContent = list[dIndex]; el.className = '';
-      el.parentNode.className = 'dhikr panel' + (list[dIndex].length > 130 ? ' long' : '');
+      var k = pick(); el.textContent = list[k]; el.className = '';
+      el.parentNode.className = 'dhikr panel' + (list[k].length > 130 ? ' long' : '');
     }
     if (first) { swap(); return; }
     el.className = 'fade';
