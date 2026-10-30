@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-30T23:10:13.874207Z",
+ "updated": "2026-10-30T23:20:13.195382Z",
  "sources": [
   {
    "source": "المملكة",
@@ -18,7 +18,7 @@
   {
    "source": "التلفزيون العربي",
    "feed": "https://www.alaraby.tv/feed",
-   "raw": 110,
+   "raw": 97,
    "kept": 3,
    "errors": []
   },
