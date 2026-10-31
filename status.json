@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-31T16:10:13.301963Z",
+ "updated": "2026-10-31T16:20:14.451808Z",
  "sources": [
   {
    "source": "المملكة",
@@ -32,7 +32,7 @@
   {
    "source": "بي بي سي عربي",
    "feed": "https://feeds.bbci.co.uk/arabic/rss.xml",
-   "raw": 26,
+   "raw": 27,
    "kept": 3,
    "errors": []
   }
