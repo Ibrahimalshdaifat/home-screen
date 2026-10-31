@@ -1,12 +1,14 @@
 {
- "updated": "2026-10-31T00:20:17.045852Z",
+ "updated": "2026-10-31T00:30:18.475384Z",
  "sources": [
   {
    "source": "المملكة",
-   "feed": "https://www.almamlakatv.com/rss.xml",
-   "raw": 10,
+   "feed": null,
+   "raw": 0,
    "kept": 0,
-   "errors": []
+   "errors": [
+    "HTTPError:https://www.almamlakatv.com/rss.xml"
+   ]
   },
   {
    "source": "الغد",
