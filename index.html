@@ -106,6 +106,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
   <button id="adhkarBtn" type="button" tabindex="-1"></button>
   <div class="news panel"><div id="newsSrc"></div><div id="newsText">جارٍ تحميل الأخبار</div><div id="newsDiag"></div></div>
 </div>
+<iframe id="scFrame" allow="autoplay" title="" aria-hidden="true" style="position:fixed;left:0;top:0;width:2px;height:2px;border:0;opacity:.01;pointer-events:none"></iframe>
 <button id="hit" type="button"></button>
 <div id="adhkarFull"><button id="afHit" type="button"></button><div id="afBox">
   <div id="afTitle"></div>
@@ -138,6 +139,8 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
       sunset: ['https://commons.wikimedia.org/wiki/Special:FilePath/Al-Aqsa_mosque_(8682155875).jpg?width=1920'],
       night: ['https://commons.wikimedia.org/wiki/Special:FilePath/Dome_of_the_Rock_at_night_(2706791939).jpg?width=1920']
     },
+    quranUrl: 'https://soundcloud.com/rogy-rogy/zjf0gqeh98hf',
+    quranTitle: 'سورة البقرة',
     feeds: [
       { name: 'الجزيرة نت', url: 'https://www.aljazeera.net/aljazeerarss/a7c186be-1baa-4bd4-9d80-a84db769f779/73d0e1b4-532f-45ef-b135-bfdff8b8cab9' },
       { name: 'بي بي سي عربي', url: 'https://feeds.bbci.co.uk/arabic/rss.xml' }
@@ -364,6 +367,8 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
   }
 
   /* ---------- أذكار الصباح والمساء: زر يظهر في وقته، والضغط عليه (OK) يبدأ العرض بملء الشاشة ---------- */
+  var Q = { playing: false, pushed: false };
+  function doneKey(k) { return ammanKey(ammanNow()) + k; }
   var AF = { open: false, i: 0, timer: null, pt: null, kind: '', last: 0, pushed: false };
   function adhkarKind() {
     if (!prayerState || !window.ADHKAR) { return ''; }
@@ -375,10 +380,13 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
   function updateAdhkarBtn() {
     var b = $('adhkarBtn'), k = adhkarKind();
     if (AF.open) { return; }
-    if (!k) { b.style.display = 'none'; $('hit').style.display = 'none'; b.setAttribute('data-k', ''); return; }
-    if (b.getAttribute('data-k') !== k) {
-      b.setAttribute('data-k', k);
-      b.innerHTML = (k === 'morning' ? 'أذكار الصباح' : 'أذكار المساء') + '<small>اضغط OK في أي مكان</small>';
+    var st = Q.playing ? 'play' : (k && load('afDone') === doneKey(k) ? 'quran' : 'adhkar');
+    if (!k && !Q.playing) { b.style.display = 'none'; $('hit').style.display = 'none'; b.setAttribute('data-k', ''); b.setAttribute('data-s', ''); return; }
+    if (b.getAttribute('data-k') !== k || b.getAttribute('data-s') !== st) {
+      b.setAttribute('data-k', k); b.setAttribute('data-s', st);
+      if (st === 'play') { b.innerHTML = CONFIG.quranTitle + ' ▶<small>رجوع للإيقاف</small>'; }
+      else if (st === 'quran') { b.innerHTML = CONFIG.quranTitle + '<small>اضغط OK للاستماع</small>'; }
+      else { b.innerHTML = (k === 'morning' ? 'أذكار الصباح' : 'أذكار المساء') + '<small>اضغط OK في أي مكان</small>'; }
     }
     if (b.style.display !== 'block') { b.style.display = 'block'; $('hit').style.display = 'block'; try { $('hit').focus(); } catch (e) {} }
   }
@@ -404,7 +412,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
   }
   function afNext() {
     AF.i++;
-    if (AF.i >= window.ADHKAR.length) { afClose(); } else { afShow(false); }
+    if (AF.i >= window.ADHKAR.length) { store('afDone', doneKey(AF.kind)); afClose(); } else { afShow(false); }
   }
   function afPrev() { if (AF.i > 0) { AF.i--; afShow(false); } }
   function afOpen() {
@@ -429,13 +437,39 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
     if (AF.open) { afClose(); } else { afOpen(); }
   }
   /* الريموت في وضع المؤشر: OK = نقرة في أي مكان. لذلك أي نقرة أو OK تفتح الأذكار في وقتها، وأثناء العرض تنتقل للتالي */
+  function qBind() {
+    try {
+      var w = SC.Widget($('scFrame'));
+      w.bind(SC.Widget.Events.READY, function () { w.play(); });
+      w.bind(SC.Widget.Events.FINISH, function () { qStop(); });
+    } catch (e) {}
+  }
+  function qStart() {
+    var f = $('scFrame');
+    f.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(CONFIG.quranUrl) + '&auto_play=true&visual=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false';
+    Q.playing = true;
+    try { history.pushState({ q: 1 }, ''); Q.pushed = true; } catch (e) {}
+    if (window.SC) { qBind(); }
+    else { var sc = document.createElement('script'); sc.src = 'https://w.soundcloud.com/player/api.js'; sc.onload = qBind; document.body.appendChild(sc); }
+    updateAdhkarBtn();
+  }
+  function qStop(fromPop) {
+    if (!Q.playing) { return; }
+    Q.playing = false;
+    $('scFrame').src = 'about:blank';
+    if (Q.pushed && !fromPop) { Q.pushed = false; try { history.back(); } catch (e) {} }
+    Q.pushed = false;
+    updateAdhkarBtn();
+  }
   function afPress() {
     var now = new Date().getTime(); if (now - AF.last < 500) { return; } AF.last = now;
-    if (AF.open) { afNext(); } else if ($('adhkarBtn').style.display === 'block') { afOpen(); }
+    if (AF.open) { afNext(); }
+    else if (Q.playing) { return; }
+    else if ($('adhkarBtn').style.display === 'block') { if ($('adhkarBtn').getAttribute('data-s') === 'quran') { qStart(); } else { afOpen(); } }
   }
   $('hit').onclick = afPress; $('afHit').onclick = afPress;
   $('afPrev').onclick = function (e) { e = e || window.event; if (e.stopPropagation) { e.stopPropagation(); } AF.last = new Date().getTime(); afPrev(); try { $('afHit').focus(); } catch (e2) {} };
-  window.onpopstate = function () { if (AF.open) { afClose(true); } };
+  window.onpopstate = function () { if (AF.open) { afClose(true); } else if (Q.playing) { qStop(true); } };
   document.onkeydown = function (e) {
     e = e || window.event; var k = e.keyCode;
     var stop = false;
@@ -444,7 +478,8 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
       else if (k === 39) { afNext(); stop = true; }
       else if (k === 37) { afPrev(); stop = true; }
       else if (k === 27 || k === 8 || k === 10009 || k === 461) { afClose(); stop = true; }
-    } else if (k === 13 && $('adhkarBtn').style.display === 'block') { afPress(); stop = true; }
+    } else if (Q.playing && (k === 27 || k === 8 || k === 10009 || k === 461)) { qStop(); stop = true; }
+    else if (k === 13 && $('adhkarBtn').style.display === 'block') { afPress(); stop = true; }
     if (stop && e.preventDefault) { e.preventDefault(); }
   };
 
