@@ -380,8 +380,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
   function updateAdhkarBtn() {
     var b = $('adhkarBtn'), k = adhkarKind();
     if (AF.open) { return; }
-    var st = Q.playing ? 'play' : (k && load('afDone') === doneKey(k) ? 'quran' : 'adhkar');
-    if (!k && !Q.playing) { b.style.display = 'none'; $('hit').style.display = 'none'; b.setAttribute('data-k', ''); b.setAttribute('data-s', ''); return; }
+    var st = Q.playing ? 'play' : (!k || load('afDone') === doneKey(k) ? 'quran' : 'adhkar');
     if (b.getAttribute('data-k') !== k || b.getAttribute('data-s') !== st) {
       b.setAttribute('data-k', k); b.setAttribute('data-s', st);
       if (st === 'play') { b.innerHTML = CONFIG.quranTitle + ' ▶<small>رجوع للإيقاف</small>'; }
