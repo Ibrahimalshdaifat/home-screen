@@ -139,7 +139,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
       sunset: ['https://commons.wikimedia.org/wiki/Special:FilePath/Al-Aqsa_mosque_(8682155875).jpg?width=1920'],
       night: ['https://commons.wikimedia.org/wiki/Special:FilePath/Dome_of_the_Rock_at_night_(2706791939).jpg?width=1920']
     },
-    quranUrl: 'https://soundcloud.com/rogy-rogy/zjf0gqeh98hf',
+    quranUrl: 'https://soundcloud.com/user-258834376/2-quran-9',
     quranTitle: 'سورة البقرة',
     feeds: [
       { name: 'الجزيرة نت', url: 'https://www.aljazeera.net/aljazeerarss/a7c186be-1baa-4bd4-9d80-a84db769f779/73d0e1b4-532f-45ef-b135-bfdff8b8cab9' },
@@ -367,7 +367,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
   }
 
   /* ---------- أذكار الصباح والمساء: زر يظهر في وقته، والضغط عليه (OK) يبدأ العرض بملء الشاشة ---------- */
-  var Q = { playing: false, pushed: false };
+  var Q = { playing: false, pushed: false, paused: false, w: null };
   function doneKey(k) { return ammanKey(ammanNow()) + k; }
   var AF = { open: false, i: 0, timer: null, pt: null, kind: '', last: 0, pushed: false };
   function adhkarKind() {
@@ -380,10 +380,11 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
   function updateAdhkarBtn() {
     var b = $('adhkarBtn'), k = adhkarKind();
     if (AF.open) { return; }
-    var st = Q.playing ? 'play' : (!k || load('afDone') === doneKey(k) ? 'quran' : 'adhkar');
+    var st = Q.playing ? (Q.paused ? 'paused' : 'play') : (!k || load('afDone') === doneKey(k) ? 'quran' : 'adhkar');
     if (b.getAttribute('data-k') !== k || b.getAttribute('data-s') !== st) {
       b.setAttribute('data-k', k); b.setAttribute('data-s', st);
-      if (st === 'play') { b.innerHTML = CONFIG.quranTitle + ' ▶<small>رجوع للإيقاف</small>'; }
+      if (st === 'play') { b.innerHTML = CONFIG.quranTitle + ' ▶<small>OK إيقاف مؤقت · رجوع للإنهاء</small>'; }
+      else if (st === 'paused') { b.innerHTML = 'متوقفة مؤقتًا ❚❚<small>OK للمتابعة · رجوع للإنهاء</small>'; }
       else if (st === 'quran') { b.innerHTML = CONFIG.quranTitle + '<small>اضغط OK للاستماع</small>'; }
       else { b.innerHTML = (k === 'morning' ? 'أذكار الصباح' : 'أذكار المساء') + '<small>اضغط OK في أي مكان</small>'; }
     }
@@ -438,8 +439,10 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
   /* الريموت في وضع المؤشر: OK = نقرة في أي مكان. لذلك أي نقرة أو OK تفتح الأذكار في وقتها، وأثناء العرض تنتقل للتالي */
   function qBind() {
     try {
-      var w = SC.Widget($('scFrame'));
+      var w = SC.Widget($('scFrame')); Q.w = w;
       w.bind(SC.Widget.Events.READY, function () { w.play(); });
+      w.bind(SC.Widget.Events.PLAY, function () { Q.paused = false; updateAdhkarBtn(); });
+      w.bind(SC.Widget.Events.PAUSE, function () { if (Q.playing) { Q.paused = true; updateAdhkarBtn(); } });
       w.bind(SC.Widget.Events.FINISH, function () { qStop(); });
     } catch (e) {}
   }
@@ -454,7 +457,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
   }
   function qStop(fromPop) {
     if (!Q.playing) { return; }
-    Q.playing = false;
+    Q.playing = false; Q.paused = false; Q.w = null;
     $('scFrame').src = 'about:blank';
     if (Q.pushed && !fromPop) { Q.pushed = false; try { history.back(); } catch (e) {} }
     Q.pushed = false;
@@ -463,7 +466,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
   function afPress() {
     var now = new Date().getTime(); if (now - AF.last < 500) { return; } AF.last = now;
     if (AF.open) { afNext(); }
-    else if (Q.playing) { return; }
+    else if (Q.playing) { Q.paused = !Q.paused; try { if (Q.w) { Q.w.toggle(); } } catch (e) {} updateAdhkarBtn(); }
     else if ($('adhkarBtn').style.display === 'block') { if ($('adhkarBtn').getAttribute('data-s') === 'quran') { qStart(); } else { afOpen(); } }
   }
   $('hit').onclick = afPress; $('afHit').onclick = afPress;
