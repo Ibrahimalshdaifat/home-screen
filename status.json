@@ -1,11 +1,11 @@
 {
- "updated": "2026-11-03T03:40:28.876799Z",
+ "updated": "2026-11-03T03:50:26.689059Z",
  "sources": [
   {
    "source": "المملكة",
    "feed": "https://www.almamlakatv.com/rss.xml",
    "raw": 10,
-   "kept": 0,
+   "kept": 1,
    "errors": []
   },
   {
