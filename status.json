@@ -1,18 +1,18 @@
 {
- "updated": "2026-11-03T18:40:16.263257Z",
+ "updated": "2026-11-03T18:50:13.764464Z",
  "sources": [
   {
    "source": "المملكة",
    "feed": "https://www.almamlakatv.com/rss.xml",
    "raw": 10,
-   "kept": 1,
+   "kept": 2,
    "errors": []
   },
   {
    "source": "الغد",
    "feed": "https://alghad.com/rss",
    "raw": 15,
-   "kept": 2,
+   "kept": 3,
    "errors": []
   },
   {
@@ -26,7 +26,7 @@
    "source": "الجزيرة نت",
    "feed": "https://www.aljazeera.net/aljazeerarss/a7c186be-1baa-4bd4-9d80-a84db769f779/73d0e1b4-532f-45ef-b135-bfdff8b8cab9",
    "raw": 25,
-   "kept": 3,
+   "kept": 2,
    "errors": []
   },
   {
