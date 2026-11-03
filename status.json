@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-03T18:30:29.351241Z",
+ "updated": "2026-11-03T18:40:16.263257Z",
  "sources": [
   {
    "source": "المملكة",
@@ -18,7 +18,7 @@
   {
    "source": "التلفزيون العربي",
    "feed": "https://www.alaraby.tv/feed",
-   "raw": 113,
+   "raw": 112,
    "kept": 3,
    "errors": []
   },
@@ -26,7 +26,7 @@
    "source": "الجزيرة نت",
    "feed": "https://www.aljazeera.net/aljazeerarss/a7c186be-1baa-4bd4-9d80-a84db769f779/73d0e1b4-532f-45ef-b135-bfdff8b8cab9",
    "raw": 25,
-   "kept": 2,
+   "kept": 3,
    "errors": []
   },
   {
