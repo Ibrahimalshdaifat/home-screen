@@ -76,6 +76,9 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
 #afCount{font-size:1.6rem;color:#93a4a7;line-height:1.4;direction:rtl}
 #afPrev,#afNext{position:relative;z-index:2;font-size:2rem;color:#86d0be;padding:.3rem 1.6rem .5rem;border:1px solid rgba(134,208,190,.5);border-radius:2rem;cursor:pointer}
 .dhikr.long #dhikrText{font-size:1.7rem;line-height:1.55}
+#szBox{display:none;position:fixed;left:8px;top:8px;z-index:60;direction:ltr}
+#szBox button{width:52px;height:52px;margin-right:6px;border:0;border-radius:26px;background:rgba(255,255,255,.28);color:#fff;font-size:30px;line-height:52px;padding:0}
+@media (pointer:coarse){#szBox{display:block}}
 </style>
 </head>
 <body>
@@ -106,6 +109,7 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
   <button id="adhkarBtn" type="button" tabindex="-1"></button>
   <div class="news panel"><div id="newsSrc"></div><div id="newsText">جارٍ تحميل الأخبار</div><div id="newsDiag"></div></div>
 </div>
+<div id="szBox"><button id="szDn" type="button">−</button><button id="szUp" type="button">+</button></div>
 <iframe id="scFrame" allow="autoplay" title="" aria-hidden="true" style="position:fixed;left:0;top:0;width:2px;height:2px;border:0;opacity:.01;pointer-events:none"></iframe>
 <button id="hit" type="button"></button>
 <div id="adhkarFull"><button id="afHit" type="button"></button><div id="afBox">
@@ -646,9 +650,23 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
   function drawScene() { updateBg(); }
 
   /* ---------- ملاءمة الحجم ---------- */
+  /* تصغير الصفحة يدويًا للشاشات التي يُقصّ جزء منها (مثل شاشات السيارات): ?s=0.8 أو أزرار − و＋ على شاشات اللمس */
+  (function () {
+    var m = /[?&]s=([0-9.]+)/.exec(window.location.search);
+    if (m) { var v = parseFloat(m[1]); if (v >= 0.4 && v <= 1) { store('scale', v); } }
+  })();
+  function userScale() {
+    var sc = parseFloat(load('scale'));
+    return sc >= 0.4 && sc <= 1 ? sc : 1;
+  }
+  function setScale(d) {
+    var sc = Math.max(0.4, Math.min(1, Math.round((userScale() + d) * 20) / 20));
+    store('scale', sc); fit();
+  }
   function fit() {
-    var w = window.innerWidth, h = window.innerHeight;
-    document.documentElement.style.fontSize = Math.min(w / 100, h / 56.25) + 'px';
+    var w = window.innerWidth, h = window.innerHeight, sc = userScale();
+    document.documentElement.style.fontSize = (Math.min(w / 100, h / 56.25) * sc) + 'px';
+    var st = $('stage'); st.style.top = sc < 1 ? '0' : ''; st.style.marginTop = sc < 1 ? '0' : '';
     updateBg();
   }
 
@@ -667,6 +685,8 @@ body{font-family:'IBM Plex Sans Arabic',Tahoma,'Segoe UI',sans-serif;font-weight
   renderPrayers();
   fit();
   window.addEventListener('resize', fit);
+  $('szDn').onclick = function (e) { setScale(-0.05); if (e && e.stopPropagation) { e.stopPropagation(); } };
+  $('szUp').onclick = function (e) { setScale(0.05); if (e && e.stopPropagation) { e.stopPropagation(); } };
   fetchWeather();
   fetchNews();
 
