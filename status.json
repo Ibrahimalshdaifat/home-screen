@@ -1,18 +1,18 @@
 {
- "updated": "2026-11-07T06:30:16.307028Z",
+ "updated": "2026-11-07T06:40:13.601975Z",
  "sources": [
   {
    "source": "المملكة",
    "feed": "https://www.almamlakatv.com/rss.xml",
    "raw": 10,
-   "kept": 1,
+   "kept": 0,
    "errors": []
   },
   {
    "source": "الغد",
    "feed": "https://alghad.com/rss",
    "raw": 15,
-   "kept": 2,
+   "kept": 1,
    "errors": []
   },
   {
